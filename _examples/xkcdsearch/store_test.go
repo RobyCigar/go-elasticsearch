@@ -80,8 +80,7 @@ func TestStore(t *testing.T) {
 	mocktrans := MockTransport{
 		Response: &http.Response{
 			StatusCode: http.StatusOK,
-			Body:       ioutil.NopCloser(strings.NewReader(`{}`)),
-			Header:     http.Header{"X-Elastic-Product": []string{"Elasticsearch"}},
+			Body:       ioutil.NopCloser(strings.NewReader(`{}`))
 		},
 	}
 	mocktrans.RoundTripFn = func(req *http.Request) (*http.Response, error) { return mocktrans.Response, nil }

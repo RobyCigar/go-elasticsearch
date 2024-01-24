@@ -35,10 +35,7 @@ type MockTransport struct{}
 
 // RoundTrip returns a mock response.
 func (t *MockTransport) RoundTrip(req *http.Request) (*http.Response, error) {
-	return &http.Response{
-		Body:   ioutil.NopCloser(strings.NewReader(`{"status":"mocked"}`)),
-		Header: http.Header{"X-Elastic-Product": []string{"Elasticsearch"}},
-	}, nil
+	return &http.Response{Body: ioutil.NopCloser(strings.NewReader(`{"status":"mocked"}`))}, nil
 }
 
 func TestHealth(t *testing.T) {

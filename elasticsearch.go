@@ -137,8 +137,6 @@ type BaseClient struct {
 	compatibilityHeader bool
 
 	disableMetaHeader   bool
-	productCheckMu      sync.RWMutex
-	productCheckSuccess bool
 }
 
 // Client represents the Functional Options API.
@@ -340,15 +338,6 @@ func (c *BaseClient) Perform(req *http.Request) (*http.Response, error) {
 	// Retrieve the original request.
 	res, err := c.Transport.Perform(req)
 
-	// ResponseCheck, we run the header check on the first answer from ES.
-	if err == nil && (res.StatusCode >= 200 && res.StatusCode < 300) {
-		checkHeader := func() error { return genuineCheckHeader(res.Header) }
-		if err := c.doProductCheck(checkHeader); err != nil {
-			res.Body.Close()
-			return nil, err
-		}
-	}
-
 	return res, err
 }
 
@@ -366,22 +355,6 @@ func (c *BaseClient) doProductCheck(f func() error) error {
 	c.productCheckMu.RLock()
 	productCheckSuccess := c.productCheckSuccess
 	c.productCheckMu.RUnlock()
-
-	if productCheckSuccess {
-		return nil
-	}
-
-	c.productCheckMu.Lock()
-	defer c.productCheckMu.Unlock()
-
-	if c.productCheckSuccess {
-		return nil
-	}
-
-	if err := f(); err != nil {
-		return err
-	}
-
 	c.productCheckSuccess = true
 
 	return nil
